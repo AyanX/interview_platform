@@ -9,7 +9,6 @@ import { serve} from 'inngest/express';
 import cors from 'cors';
 app.use(cors({
     credentials: true,
-    origin: env.CLIENT_URL,
 }))
 app.use(clerkMiddleware())
 app.use(express.json());
