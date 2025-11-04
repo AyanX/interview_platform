@@ -3,13 +3,38 @@ import User from "../models/users.model.js";
 import connectDb from "./connectDb.js";
 
 export const inngest = new Inngest({
-    id: "interviews app",
-    name: "Interviews App",
+    id: "interviews-app"
 });
+
+const addUserToDb = async (userData) => {
+    console.log("Syncing user data to MongoDB");
+    // extract user data from event
+    const { id, email, name, clerkId } = userData;
+    // check if user already exists
+    let user = await User.findOne({
+        clerkId: id,
+    });
+    if (user) {
+        console.log("User already exists in MongoDB");
+        return 
+    }
+    // create new user
+    user = new User({
+        name,
+        email,
+        clerkId,
+        id
+    });
+    // return new user
+    return {
+        user,
+        created: true,
+    };
+};
 
 const syncUser = inngest.createFunction(
     {
-        id: "create-user",
+        id: "sync-user",
     },
     {
         event: "clerk/user.created",
@@ -25,34 +50,7 @@ const syncUser = inngest.createFunction(
     // Logic to sync user data from Clerk to MongoDB
 );
 
-const addUserToDb = async (userData) => {
-    console.log("Syncing user data to MongoDB");
-    // extract user data from event
-    const { id, email, name, clerkId } = userData;
-    // check if user already exists
-    let user = await User.findOne({
-        clerkId: id,
-    });
-    if (user) {
-        console.log("User already exists in MongoDB");
-        return {
-            user,
-            created: false,
-        };
-    }
-    // create new user
-    user = new User({
-        name,
-        email,
-        clerkId,
-        id
-    });
-    // return new user
-    return {
-        user,
-        created: true,
-    };
-};
+
 
 const deleteUser = inngest.createFunction(
     {
@@ -110,9 +108,6 @@ const syncUserUpdate = inngest.createFunction(
         }
     }
 );
-
-
-
 
 export const functions = [syncUser,
     deleteUser,
