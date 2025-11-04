@@ -14,7 +14,7 @@ app.use(clerkMiddleware())
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/api/inngest", serve({client:inngest,functions:functions}));
+app.get("/api/inngest", serve({client:inngest,functions:functions}));
 
 app.get("/health", (req, res) => {
     res.send("API is running....");
