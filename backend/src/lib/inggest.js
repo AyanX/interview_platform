@@ -23,8 +23,9 @@ const addUserToDb = async (userData) => {
         name,
         email,
         password,
-        clerkId,
+        clerkId: id,
     });
+    console.log("New user created:", newUser);
     // return new user
     return {
         newUser,
@@ -43,7 +44,7 @@ const syncUser = inngest.createFunction(
         try {
             await connectDb();
             console.log("Clerk user created event received");
-
+            console.log(event.data)
             const newUser = await addUserToDb(event.data);
             await User.create(newUser.newUser);
             console.log("User synced to MongoDB");
