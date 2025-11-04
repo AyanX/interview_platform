@@ -1,0 +1,113 @@
+import { Inngest } from "inngest";
+import User from "../models/users.model.js";
+import connectDb from "./connectDb.js";
+
+export const inngest = new Inngest({
+    id: "interviews app",
+    name: "Interviews App",
+});
+
+const syncUser = inngest.createFunction(
+    {
+        id: "create-user",
+    },
+    {
+        event: "clerk/user.created",
+    },
+    async ({ event }) => {
+        await connectDb();
+        console.log("Clerk user created event received");
+
+        const newUser = await addUserToDb(event.data);
+        await User.create(newUser.user);
+        console.log("User synced to MongoDB");
+    }
+    // Logic to sync user data from Clerk to MongoDB
+);
+
+const addUserToDb = async (userData) => {
+    console.log("Syncing user data to MongoDB");
+    // extract user data from event
+    const { id, email, name, password, clerkId } = userData;
+    // check if user already exists
+    let user = await User.findOne({
+        clerkId: id,
+    });
+    if (user) {
+        console.log("User already exists in MongoDB");
+        return {
+            user,
+            created: false,
+        };
+    }
+    // create new user
+    user = new User({
+        name,
+        email,
+        password,
+        clerkId,
+        id
+    });
+    // return new user
+    return {
+        user,
+        created: true,
+    };
+};
+
+const deleteUser = inngest.createFunction(
+    {
+        id: "delete-user",
+    },
+    {
+        event: "clerk/user.deleted",
+    },
+    async ({ event }) => {
+        await connectDb();
+        console.log("Clerk user deleted event received");
+
+        // Logic to sync user data from Clerk to MongoDB
+
+        const deletedUser = await User.findOneAndDelete({
+            clerkId: event.data.id,
+        });
+        if (deletedUser) {
+            console.log("User deleted from MongoDB");
+        } else {
+            console.log("User not found in MongoDB");
+        }
+    }
+    // Logic to sync user data from Clerk to MongoDB
+);
+const syncUserUpdate = inngest.createFunction(
+    {
+        id: "update-user",
+    },
+    {
+        event: "clerk/user.updated",
+    },
+    async ({ event }) => {
+        await connectDb();
+
+        // Logic to update user data from Clerk to MongoDB
+
+        console.log("Clerk user updated event received");
+        // if no updatedUser,
+        const updatedUser = await addUserToDb(event.data);
+        // if user does not exist, create new user
+        !updatedUser.created &&
+            (await User.findOneAndUpdate(
+                {
+                    clerkId: event.data.id,
+                },
+                updatedUser.user
+            ));
+        console.log("User synced to MongoDB");
+    }
+);
+
+export const functions = {
+    syncUser,
+    deleteUser,
+    syncUserUpdate,
+};
