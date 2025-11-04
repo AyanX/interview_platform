@@ -9,7 +9,7 @@ export const inngest = new Inngest({
 const addUserToDb = async (userData) => {
     console.log("Syncing user data to MongoDB");
     // extract user data from event
-    const { id, email, name, clerkId } = userData;
+    const { id, email, name, clerkId, password } = userData;
     // check if user already exists
     let user = await User.findOne({
         clerkId: id,
@@ -19,15 +19,15 @@ const addUserToDb = async (userData) => {
         return 
     }
     // create new user
-    user = new User({
+    const newUser = new User({
         name,
         email,
+        password,
         clerkId,
-        id
     });
     // return new user
     return {
-        user,
+        newUser,
         created: true,
     };
 };
@@ -40,12 +40,16 @@ const syncUser = inngest.createFunction(
         event: "clerk/user.created",
     },
     async ({ event }) => {
-        await connectDb();
-        console.log("Clerk user created event received");
+        try {
+            await connectDb();
+            console.log("Clerk user created event received");
 
-        const newUser = await addUserToDb(event.data);
-        await User.create(newUser.user);
-        console.log("User synced to MongoDB");
+            const newUser = await addUserToDb(event.data);
+            await User.create(newUser.newUser);
+            console.log("User synced to MongoDB");
+        } catch (error) {
+            console.error("Error syncing user to MongoDB:", error);
+        }
     }
     // Logic to sync user data from Clerk to MongoDB
 );
