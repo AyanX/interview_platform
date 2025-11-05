@@ -9,7 +9,7 @@ export const inngest = new Inngest({
 const addUserToDb = async (userData) => {
     console.log("Syncing user data to MongoDB");
     // extract user data from event
-    const { id, email, name, clerkId, password } = userData;
+    const { id, email_addresses, password, first_name, last_name } = userData;
     // check if user already exists
     let user = await User.findOne({
         clerkId: id,
@@ -20,8 +20,8 @@ const addUserToDb = async (userData) => {
     }
     // create new user
     const newUser = new User({
-        name,
-        email,
+        name: first_name + " " + last_name,
+        email: email_addresses[0].email_address,
         password,
         clerkId: id,
     });
