@@ -21,11 +21,10 @@ const addUserToDb = async (userData) => {
     }
     // create new user
     const newUser = new User({
-        name: first_name && first_name + " " + last_name && last_name,
+        name: first_name + " " + last_name && last_name,
         email: email_addresses[0]?.email_address,
-        password,
         clerkId: id,
-        id:id,
+        id:id.toString(),
     });
     console.log("New user created:", newUser);
     // return new user
@@ -46,7 +45,6 @@ const syncUser = inngest.createFunction(
         try {
             await connectDb();
             console.log("Clerk user created event received");
-            console.log(event.data)
             const newUser = await addUserToDb(event.data);
             await User.create(newUser.newUser);
             upsertUserStream(newUser.newUser)
