@@ -41,16 +41,13 @@ const syncUser = inngest.createFunction(
         event: "clerk/user.created",
     },
     async ({ event }) => {
-        try {
             await connectDb();
             console.log("Clerk user created event received");
             console.log(event.data)
             const newUser = await addUserToDb(event.data);
             await User.create(newUser.newUser);
             console.log("User synced to MongoDB");
-        } catch (error) {
-            console.error("Error syncing user to MongoDB:", error);
-        }
+     
     }
     // Logic to sync user data from Clerk to MongoDB
 );
