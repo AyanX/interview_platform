@@ -7,6 +7,7 @@ export const client = StreamChat.getInstance(env.STREAM_API_KEY,env.STREAM_API_S
 export const upsertUserStream= async(userData)=>{
     try {
        await client.upsertUser(userData)
+       console.log("user added to stream")
     } catch (error) {
         console.log("error upserting user to Stream", error)
     }
