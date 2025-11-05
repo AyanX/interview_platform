@@ -25,6 +25,7 @@ const addUserToDb = async (userData) => {
         email: email_addresses[0]?.email_address,
         password,
         clerkId: id,
+        id:id,
     });
     console.log("New user created:", newUser);
     // return new user
