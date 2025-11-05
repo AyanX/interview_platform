@@ -20,8 +20,8 @@ const addUserToDb = async (userData) => {
     }
     // create new user
     const newUser = new User({
-        name: first_name + " " + last_name,
-        email: email_addresses[0].email_address,
+        name: first_name && first_name+ " " + last_name && last_name,
+        email: email_addresses[0]?.email_address,
         password,
         clerkId: id,
     });
