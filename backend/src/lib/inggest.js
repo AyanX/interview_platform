@@ -1,6 +1,7 @@
 import { Inngest } from "inngest";
 import User from "../models/users.model.js";
 import connectDb from "./connectDb.js";
+import { upsertUserStream, deleteUserStream } from "./stream.js";
 
 export const inngest = new Inngest({
     id: "interviews-app"
@@ -16,11 +17,11 @@ const addUserToDb = async (userData) => {
     });
     if (user) {
         console.log("User already exists in MongoDB");
-        return 
+        return
     }
     // create new user
     const newUser = new User({
-        name: first_name && first_name+ " " + last_name && last_name,
+        name: first_name && first_name + " " + last_name && last_name,
         email: email_addresses[0]?.email_address,
         password,
         clerkId: id,
@@ -41,13 +42,18 @@ const syncUser = inngest.createFunction(
         event: "clerk/user.created",
     },
     async ({ event }) => {
+        try {
             await connectDb();
             console.log("Clerk user created event received");
             console.log(event.data)
             const newUser = await addUserToDb(event.data);
             await User.create(newUser.newUser);
+            upsertUserStream(newUser.newUser)
             console.log("User synced to MongoDB");
-     
+        } catch (error) {
+            console.log("err syncing user to clerk or stream", error)
+        }
+
     }
     // Logic to sync user data from Clerk to MongoDB
 );
@@ -62,18 +68,23 @@ const deleteUser = inngest.createFunction(
         event: "clerk/user.deleted",
     },
     async ({ event }) => {
-        await connectDb();
-        console.log("Clerk user deleted event received");
+        try {
+            await connectDb();
+            console.log("Clerk user deleted event received");
 
-        // Logic to sync user data from Clerk to MongoDB
+            // Logic to sync user data from Clerk to MongoDB
 
-        const deletedUser = await User.findOneAndDelete({
-            clerkId: event.data.id,
-        });
-        if (deletedUser) {
-            console.log("User deleted from MongoDB");
-        } else {
-            console.log("User not found in MongoDB");
+            const deletedUser = await User.findOneAndDelete({
+                clerkId: event.data.id,
+            });
+            deleteUserStream(event.data.id)
+            if (deletedUser) {
+                console.log("User deleted from MongoDB");
+            } else {
+                console.log("User not found in MongoDB");
+            }
+        } catch (error) {
+            console.log("error deleting user", error)
         }
     }
     // Logic to sync user data from Clerk to MongoDB
