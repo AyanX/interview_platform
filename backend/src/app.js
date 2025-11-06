@@ -14,7 +14,12 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cors({ origin: '*' }));
+app.use(
+  cors({
+    origin: 'http://localhost:3000', // must match your frontend origin
+    credentials: true, // allow cookies/auth headers
+  })
+);
 
 app.use("/api/inngest", serve({client:inngest,functions:functions}));
 app.get("/",(req,res)=>res.send("interview homepage"))
