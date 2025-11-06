@@ -2,6 +2,7 @@ import { requireAuth } from "@clerk/express";
 import usersModel from "../models/users.model.js";
 
 export const protectedRoute = [
+  ()=>{console.log("Protected route middleware invoked");},
   requireAuth(),
   async(req,res,next)=>{
     try {
