@@ -22,7 +22,10 @@ app.use(
 );
 
 app.use("/api/inngest", serve({client:inngest,functions:functions}));
-app.get("/",(req,res)=>res.send({message: "Welcome to the interview platform API!"}))
+app.get("/",(req,res)=>{
+    console.log("Root route accessed");
+    return  res.send({message: "Welcome to the interview platform API!"})
+});
 app.get("/health", (req, res) => {
    return res.send({ status: 'OK' });
 });
