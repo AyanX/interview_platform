@@ -22,13 +22,14 @@ app.use(
 );
 
 app.use("/api/inngest", serve({client:inngest,functions:functions}));
-app.get("/",(req,res)=>res.send("interview homepage"))
+app.get("/",(req,res)=>res.send({message: "Welcome to the interview platform API!"}))
 app.get("/health", (req, res) => {
-    res.send("API is running....");
+   return res.send({ status: 'OK' });
 });
 
 
 app.get("/protected",protectedRoute,(req,res)=>{
+    console.log(" Protected route accessed by user:", req.user);
     res.send(`Hello ${req.user.name}, you have accessed a protected route!`);
 });
 
