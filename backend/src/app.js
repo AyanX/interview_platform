@@ -6,18 +6,25 @@ import bodyParser from 'body-parser';
 import { functions, inngest } from './lib/inggest.js';
 import { clerkMiddleware } from '@clerk/express'
 import { serve} from 'inngest/express';
+import { protectedRoute } from './middlewares/protectedRoute.js';
+import cors from 'cors';
+//add auth to req obj
 app.use(clerkMiddleware())
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-
+app.use(cors())
 
 app.use("/api/inngest", serve({client:inngest,functions:functions}));
 app.get("/",(req,res)=>res.send("interview homepage"))
 app.get("/health", (req, res) => {
     res.send("API is running....");
+});
+
+
+app.get("/protected",protectedRoute,(req,res)=>{
+    res.send(`Hello ${req.user.name}, you have accessed a protected route!`);
 });
 
 if (env.NODE_ENV === 'production') {
