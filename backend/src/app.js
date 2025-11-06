@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cors())
+app.use(cors({ origin: '*' }));
 
 app.use("/api/inngest", serve({client:inngest,functions:functions}));
 app.get("/",(req,res)=>res.send("interview homepage"))
