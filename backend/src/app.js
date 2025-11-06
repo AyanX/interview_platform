@@ -34,7 +34,7 @@ app.get("/health", (req, res) => {
 
 app.get("/protected",protectedRoute,(req,res)=>{
     console.log(" Protected route accessed by user:", req.user);
-    res.send({ message: `Hello ${req.user.name}, you have accessed a protected route!` });
+    res.status(200).send({ message: `Hello ${req.user.name}, you have accessed a protected route!` });
 });
 
 if (env.NODE_ENV === 'production') {
